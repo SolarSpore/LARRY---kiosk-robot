@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0a;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    cursor: none;
+    font-family: monospace;
+  }
+  #stage { position: relative; width: 100%; height: 100%; }
+  #larry {
+    position: absolute;
+    transform: translate(-50%, -50%);
+  }
+  .scanline {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,255,70,0.015) 2px,
+      rgba(0,255,70,0.015) 4px
+    );
+    pointer-events: none;
+    z-index: 10;
+  }
+  #tap-hint {
+    position: fixed;
+    bottom: 32px;
+    width: 100%;
+    text-align: center;
+    color: rgba(0,255,70,0.25);
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    z-index: 20;
+    animation: fadeHint 3s ease-in-out infinite;
+  }
+  @keyframes fadeHint {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+<div id="stage">
+  <svg id="larry" viewBox="0 0 260 310" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="3" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="softglow">
+        <feGaussianBlur stdDeviation="6" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="strongglow">
+        <feGaussianBlur stdDeviation="4" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <clipPath id="clip-left"><circle cx="85" cy="105" r="28"/></clipPath>
+      <clipPath id="clip-right"><circle cx="175" cy="105" r="28"/></clipPath>
+    </defs>
+
+    <!-- neck -->
+    <rect x="105" y="205" width="20" height="18" rx="2" fill="#1a1a1a" stroke="#00ff46" stroke-width="0.8"/>
+    <rect x="110" y="207" width="10" height="3" rx="1" fill="#00ff46" opacity="0.4"/>
+    <rect x="110" y="213" width="10" height="3" rx="1" fill="#00ff46" opacity="0.4"/>
+    <rect x="110" y="219" width="10" height="3" rx="1" fill="#00ff46" opacity="0.4"/>
+
+    <!-- body -->
+    <rect x="60" y="222" width="140" height="70" rx="10" fill="#111" stroke="#00ff46" stroke-width="1.2"/>
+    <rect x="80" y="235" width="100" height="44" rx="6" fill="#0d0d0d" stroke="#00ff46" stroke-width="0.6" opacity="0.8"/>
+    <circle cx="100" cy="250" r="5" fill="#00ff46" filter="url(#glow)" opacity="0.9">
+      <animate attributeName="opacity" values="0.9;0.3;0.9" dur="2.1s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="118" cy="250" r="5" fill="#00ff46" filter="url(#glow)" opacity="0.5">
+      <animate attributeName="opacity" values="0.5;0.9;0.5" dur="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="136" cy="250" r="5" fill="#00ff46" filter="url(#glow)" opacity="0.7">
+      <animate attributeName="opacity" values="0.7;0.2;0.7" dur="2.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="154" cy="250" r="5" fill="#00ff46" filter="url(#glow)" opacity="0.4">
+      <animate attributeName="opacity" values="0.4;0.9;0.4" dur="1.6s" repeatCount="indefinite"/>
+    </circle>
+    <rect x="88" y="262" width="84" height="8" rx="4" fill="#0a0a0a" stroke="#00ff46" stroke-width="0.5"/>
+    <rect x="90" y="264" width="40" height="4" rx="2" fill="#00ff46" opacity="0.7">
+      <animate attributeName="width" values="40;70;20;55;40" dur="4s" repeatCount="indefinite"/>
+    </rect>
+
+    <!-- head -->
+    <rect x="45" y="30" width="170" height="175" rx="18" fill="#111" stroke="#00ff46" stroke-width="1.5"/>
+    <rect x="90" y="30" width="80" height="6" rx="3" fill="#00ff46" opacity="0.15"/>
+    <rect x="126" y="8" width="8" height="24" rx="3" fill="#1a1a1a" stroke="#00ff46" stroke-width="0.8"/>
+    <circle cx="130" cy="6" r="5" fill="#00ff46" filter="url(#glow)">
+      <animate attributeName="opacity" values="1;0.2;1" dur="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <rect x="60" y="48" width="140" height="140" rx="12" fill="#0c0c0c" stroke="#00ff46" stroke-width="0.6" opacity="0.6"/>
+
+    <!-- side vents -->
+    <rect x="45" y="90" width="10" height="4" rx="1" fill="#00ff46" opacity="0.3"/>
+    <rect x="45" y="100" width="10" height="4" rx="1" fill="#00ff46" opacity="0.3"/>
+    <rect x="45" y="110" width="10" height="4" rx="1" fill="#00ff46" opacity="0.3"/>
+    <rect x="205" y="90" width="10" height="4" rx="1" fill="#00ff46" opacity="0.3"/>
+    <rect x="205" y="100" width="10" height="4" rx="1" fill="#00ff46" opacity="0.3"/>
+    <rect x="205" y="110" width="10" height="4" rx="1" fill="#00ff46" opacity="0.3"/>
+
+    <!-- LEFT EYE -->
+    <g>
+      <circle cx="85" cy="105" r="30" fill="#0a0a0a" stroke="#00ff46" stroke-width="1.5" filter="url(#glow)"/>
+      <circle cx="85" cy="105" r="27" fill="none" stroke="#00ff46" stroke-width="0.5" stroke-dasharray="4 6" opacity="0.5"/>
+      <rect x="81" y="74" width="8" height="3" rx="1" fill="#00ff46" opacity="0.7"/>
+      <rect x="81" y="133" width="8" height="3" rx="1" fill="#00ff46" opacity="0.7"/>
+      <rect x="54" y="102" width="3" height="6" rx="1" fill="#00ff46" opacity="0.7"/>
+      <rect x="113" y="102" width="3" height="6" rx="1" fill="#00ff46" opacity="0.7"/>
+      <circle cx="85" cy="105" r="22" fill="#050f05" stroke="#00ff46" stroke-width="0.8"/>
+      <g clip-path="url(#clip-left)">
+        <g id="iris-l-rot" style="transform-origin:85px 105px">
+          <circle cx="85" cy="105" r="20" fill="none" stroke="#00ff46" stroke-width="0.8" stroke-dasharray="8 4" opacity="0.6"/>
+          <circle cx="85" cy="105" r="15" fill="none" stroke="#00ff46" stroke-width="0.6" stroke-dasharray="5 5" opacity="0.5"/>
+          <circle cx="85" cy="105" r="10" fill="none" stroke="#00ff46" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.7"/>
+          <line x1="85" y1="77" x2="85" y2="133" stroke="#00ff46" stroke-width="0.4" opacity="0.3"/>
+          <line x1="57" y1="105" x2="113" y2="105" stroke="#00ff46" stroke-width="0.4" opacity="0.3"/>
+          <line x1="65" y1="85" x2="105" y2="125" stroke="#00ff46" stroke-width="0.4" opacity="0.3"/>
+          <line x1="105" y1="85" x2="65" y2="125" stroke="#00ff46" stroke-width="0.4" opacity="0.3"/>
+          <line x1="65" y1="95" x2="105" y2="115" stroke="#00ff46" stroke-width="0.3" opacity="0.2"/>
+          <line x1="105" y1="95" x2="65" y2="115" stroke="#00ff46" stroke-width="0.3" opacity="0.2"/>
+          <circle cx="85" cy="105" r="5" fill="none" stroke="#00ff46" stroke-width="1" opacity="0.5"/>
+        </g>
+      </g>
+      <ellipse id="pupil-l" cx="85" cy="105" rx="3.5" ry="9" fill="#00ff46" filter="url(#strongglow)" opacity="0.95"/>
+      <ellipse cx="85" cy="105" rx="1.5" ry="6" fill="#001a00"/>
+      <ellipse cx="83" cy="101" rx="1" ry="2" fill="#00ff46" opacity="0.8"/>
+      <line id="scan-l" x1="57" y1="105" x2="113" y2="105" stroke="#00ff46" stroke-width="1" opacity="0" filter="url(#glow)" clip-path="url(#clip-left)"/>
+      <circle cx="85" cy="105" r="22" fill="none" stroke="#00ff46" stroke-width="2" opacity="0.1" filter="url(#strongglow)"/>
+    </g>
+
+    <!-- RIGHT EYE -->
+    <g>
+      <circle cx="175" cy="105" r="30" fill="#0a0a0a" stroke="#00ff46" stroke-width="1.5" filter="url(#glow)"/>
+      <circle cx="175" cy="105" r="27" fill="none" stroke="#00ff46" stroke-width="0.5" stroke-dasharray="4 6" opacity="0.5"/>
+      <rect x="171" y="74" width="8" height="3" rx="1" fill="#00ff46" opacity="0.7"/>
+      <rect x="171" y="133" width="8" height="3" rx="1" fill="#00ff46" opacity="0.7"/>
+      <rect x="144" y="102" width="3" height="6" rx="1" fill="#00ff46" opacity="0.7"/>
+      <rect x="203" y="102" width="3" height="6" rx="1" fill="#00ff46" opacity="0.7"/>
+      <circle cx="175" cy="105" r="22" fill="#050f05" stroke="#00ff46" stroke-width="0.8"/>
+      <g clip-path="url(#clip-right)">
+        <g id="iris-r-rot" style="transform-origin:175px 105px">
+          <circle cx="175" cy="105" r="20" fill="none" stroke="#00ff46" stroke-width="0.8" stroke-dasharray="8 4" opacity="0.6"/>
+          <circle cx="175" cy="105" r="15" fill="none" stroke="#00ff46" stroke-width="0.6" stroke-dasharray="5 5" opacity="0.5"/>
+          <circle cx="175" cy="105" r="10" fill="none" stroke="#00ff46" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.7"/>
+          <line x1="175" y1="77" x2="175" y2="133" stroke="#00ff46" stroke-width="0.4" opacity="0.3"/>
+          <line x1="147" y1="105" x2="203" y2="105" stroke="#00ff46" stroke-width="0.4" opacity="0.3"/>
+          <line x1="155" y1="85" x2="195" y2="125" stroke="#00ff46" stroke-width="0.4" opacity="0.3"/>
+          <line x1="195" y1="85" x2="155" y2="125" stroke="#00ff46" stroke-width="0.4" opacity="0.3"/>
+          <line x1="155" y1="95" x2="195" y2="115" stroke="#00ff46" stroke-width="0.3" opacity="0.2"/>
+          <line x1="195" y1="95" x2="155" y2="115" stroke="#00ff46" stroke-width="0.3" opacity="0.2"/>
+          <circle cx="175" cy="105" r="5" fill="none" stroke="#00ff46" stroke-width="1" opacity="0.5"/>
+        </g>
+      </g>
+      <ellipse id="pupil-r" cx="175" cy="105" rx="3.5" ry="9" fill="#00ff46" filter="url(#strongglow)" opacity="0.95"/>
+      <ellipse cx="175" cy="105" rx="1.5" ry="6" fill="#001a00"/>
+      <ellipse cx="173" cy="101" rx="1" ry="2" fill="#00ff46" opacity="0.8"/>
+      <line id="scan-r" x1="147" y1="105" x2="203" y2="105" stroke="#00ff46" stroke-width="1" opacity="0" filter="url(#glow)" clip-path="url(#clip-right)"/>
+      <circle cx="175" cy="105" r="22" fill="none" stroke="#00ff46" stroke-width="2" opacity="0.1" filter="url(#strongglow)"/>
+    </g>
+
+    <!-- nose -->
+    <circle cx="130" cy="152" r="3" fill="#00ff46" opacity="0.4" filter="url(#glow)"/>
+
+    <!-- mouth -->
+    <rect x="92" y="163" width="76" height="18" rx="6" fill="#0a0a0a" stroke="#00ff46" stroke-width="0.6"/>
+    <line x1="100" y1="172" x2="160" y2="172" stroke="#00ff46" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+    <circle cx="163" cy="170" r="2.5" fill="none" stroke="#00ff46" stroke-width="1" opacity="0.6">
+      <animate attributeName="r" values="2.5;5;2.5" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0;0.6" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="170;163;170" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="169" cy="164" r="4" fill="none" stroke="#00ff46" stroke-width="1" opacity="0.4">
+      <animate attributeName="r" values="4;8;4" dur="2s" begin="0.4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.4;0;0.4" dur="2s" begin="0.4s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="164;154;164" dur="2s" begin="0.4s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- ZZZ -->
+    <text x="188" y="72" font-family="monospace" font-size="14" fill="#00ff46" filter="url(#glow)" font-weight="bold">Z
+      <animate attributeName="opacity" values="0.9;0;0.9" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="72;58;72" dur="3s" repeatCount="indefinite"/>
+    </text>
+    <text x="200" y="56" font-family="monospace" font-size="18" fill="#00ff46" filter="url(#glow)" font-weight="bold">Z
+      <animate attributeName="opacity" values="0;0.7;0" dur="3s" begin="0.8s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="56;40;56" dur="3s" begin="0.8s" repeatCount="indefinite"/>
+    </text>
+    <text x="215" y="40" font-family="monospace" font-size="22" fill="#00ff46" filter="url(#softglow)" font-weight="bold">Z
+      <animate attributeName="opacity" values="0;0.5;0" dur="3s" begin="1.6s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="40;22;40" dur="3s" begin="1.6s" repeatCount="indefinite"/>
+    </text>
+
+    <!-- breathing -->
+    <animateTransform attributeName="transform" type="scale" values="1 1; 1.012 1.008; 1 1" dur="4s" repeatCount="indefinite" additive="sum" transformOrigin="130 155"/>
+  </svg>
+</div>
+<div id="tap-hint">tap to wake larry</div>
+
+<script>
+  // =============================================
+  // LARRY CONFIG — tweak these to your liking
+  // =============================================
+  const CONFIG = {
+    // Size of Larry in pixels
+    larryWidth:  420,
+    larryHeight: 480,
+
+    // Movement speed (pixels per frame at 60fps)
+    speedMin: 0.9,
+    speedMax: 1.4,
+
+    // How often the scan triggers (milliseconds, random between min and max)
+    scanIntervalMin: 5000,
+    scanIntervalMax: 13000,
+
+    // How fast the iris spins during a scan (degrees per frame)
+    scanSpinSpeed: 1.8,
+
+    // How fast the iris slowly rotates when idle
+    idleSpinSpeed: 0.04,
+
+    // Duration of the scan sweep animation (milliseconds)
+    scanDuration: 2200,
+
+    // Screensaver idle timeout before showing Larry (seconds, for swayidle)
+    // Note: change this in your systemd/autostart config, not here
+    // Just a reminder: current value is 300s (5 minutes)
+
+    // Where to go when Larry is tapped
+    wakeUrl: 'http://192.168.1.182:8123',
+
+    // Accent color (Razer green)
+    accentColor: '#00ff46',
+
+    // Background color
+    bgColor: '#0a0a0a',
+  };
+  // =============================================
+
+  const larry = document.getElementById('larry');
+  larry.style.width  = CONFIG.larryWidth  + 'px';
+  larry.style.height = CONFIG.larryHeight + 'px';
+  document.body.style.background = CONFIG.bgColor;
+
+  const irisL  = document.getElementById('iris-l-rot');
+  const irisR  = document.getElementById('iris-r-rot');
+  const pupilL = document.getElementById('pupil-l');
+  const pupilR = document.getElementById('pupil-r');
+  const scanL  = document.getElementById('scan-l');
+  const scanR  = document.getElementById('scan-r');
+
+  let x = window.innerWidth  / 2;
+  let y = window.innerHeight / 2;
+
+  function randSpeed() {
+    const mag = CONFIG.speedMin + Math.random() * (CONFIG.speedMax - CONFIG.speedMin);
+    return Math.random() > 0.5 ? mag : -mag;
+  }
+  let vx = randSpeed();
+  let vy = randSpeed();
+
+  let angleL = 0, angleR = 0;
+  let scanning = false;
+  let scanT = 0;
+  let nextScan = CONFIG.scanIntervalMin + Math.random() * (CONFIG.scanIntervalMax - CONFIG.scanIntervalMin);
+  let lastTime = null;
+
+  function loop(ts) {
+    if (!lastTime) lastTime = ts;
+    const dt = Math.min(ts - lastTime, 50);
+    lastTime = ts;
+
+    // Move Larry
+    x += vx;
+    y += vy;
+    const hw = CONFIG.larryWidth  / 2;
+    const hh = CONFIG.larryHeight / 2;
+    if (x - hw < 0)                  { x = hw;                   vx =  Math.abs(vx); }
+    if (x + hw > window.innerWidth)  { x = window.innerWidth-hw; vx = -Math.abs(vx); }
+    if (y - hh < 0)                  { y = hh;                   vy =  Math.abs(vy); }
+    if (y + hh > window.innerHeight) { y = window.innerHeight-hh; vy = -Math.abs(vy); }
+    larry.style.left = x + 'px';
+    larry.style.top  = y + 'px';
+
+    // Eye animation
+    if (scanning) {
+      scanT += dt;
+      const p    = Math.min(scanT / CONFIG.scanDuration, 1);
+      const midP = Math.sin(p * Math.PI);
+
+      angleL += CONFIG.scanSpinSpeed * dt / 16;
+      angleR += CONFIG.scanSpinSpeed * dt / 16;
+
+      const scanY = 77 + p * 56;
+      scanL.setAttribute('y1', scanY); scanL.setAttribute('y2', scanY);
+      scanR.setAttribute('y1', scanY); scanR.setAttribute('y2', scanY);
+      scanL.setAttribute('opacity', (midP * 0.9).toFixed(2));
+      scanR.setAttribute('opacity', (midP * 0.9).toFixed(2));
+
+      const pw = 3.5 + midP * 3;
+      const ph = 9   - midP * 4;
+      pupilL.setAttribute('rx', pw.toFixed(1)); pupilL.setAttribute('ry', ph.toFixed(1));
+      pupilR.setAttribute('rx', pw.toFixed(1)); pupilR.setAttribute('ry', ph.toFixed(1));
+
+      if (p >= 1) {
+        scanning = false; scanT = 0;
+        scanL.setAttribute('opacity', '0'); scanR.setAttribute('opacity', '0');
+        pupilL.setAttribute('rx', '3.5');   pupilL.setAttribute('ry', '9');
+        pupilR.setAttribute('rx', '3.5');   pupilR.setAttribute('ry', '9');
+        nextScan = CONFIG.scanIntervalMin + Math.random() * (CONFIG.scanIntervalMax - CONFIG.scanIntervalMin);
+      }
+    } else {
+      angleL += CONFIG.idleSpinSpeed * dt / 16;
+      angleR += CONFIG.idleSpinSpeed * dt / 16;
+      nextScan -= dt;
+      if (nextScan <= 0) scanning = true;
+    }
+
+    irisL.style.transform = `rotate(${angleL.toFixed(2)}deg)`;
+    irisR.style.transform = `rotate(${angleR.toFixed(2)}deg)`;
+
+    requestAnimationFrame(loop);
+  }
+
+  requestAnimationFrame(loop);
+
+  function wake() { window.location.href = CONFIG.wakeUrl; }
+  document.addEventListener('click',      wake);
+  document.addEventListener('touchstart', wake);
+  document.addEventListener('keydown',    wake);
+</script>
+</body>
+</html>
