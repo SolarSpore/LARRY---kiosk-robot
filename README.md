@@ -1,6 +1,6 @@
 # Larry the Screensaver
 
-Larry is a sleeping robot screensaver built in a single HTML file. He drifts around the screen to prevent burn-in, breathes slowly, and occasionally opens his cybernetic eyes to run a retinal scan. Tap anywhere to wake him and return to your dashboard.
+Larry is a sleeping robot screensaver built in a single HTML file. He drifts around the screen to prevent burn-in, sensors move slowly, and he occasionally uses his cybernetic eyes to run a retinal scan. Tap anywhere to wake him and return to your dashboard.
 
 He was built for a Raspberry Pi 5 running a Home Assistant kiosk on a 10.1" touchscreen, but he'll run in any modern browser on any screen size.
 
