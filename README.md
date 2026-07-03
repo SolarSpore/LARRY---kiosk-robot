@@ -30,16 +30,16 @@ He was built for a Raspberry Pi 5 running a Home Assistant kiosk on a 10.1" touc
 
 ```mermaid
 graph TD
-    HA["Home Assistant\n<HA_IP>:8123"]
-    WY["wyoming-satellite\n(speech pipeline)\nport 10700"]
-    OW["wyoming-openwakeword\n(wake word detection)\nport 10400"]
-    LB["larry-bridge.py\n(TCP server port 10500)\n(WebSocket server port 8765)"]
-    CR["Chromium Kiosk\n(larry.html)"]
+    HA["Home Assistant<br/><HA_IP>:8123"]
+    WY["wyoming-satellite<br/>speech pipeline<br/>port 10700"]
+    OW["wyoming-openwakeword<br/>wake word detection<br/>port 10400"]
+    LB["larry-bridge.py<br/>TCP server port 10500<br/>WebSocket server port 8765"]
+    CR["Chromium Kiosk<br/>larry.html"]
 
-    HA <-->|"Wyoming protocol\ntcp://0.0.0.0:10700"| WY
-    OW <-->|"Wake word events\ntcp://127.0.0.1:10400"| WY
-    WY -->|"Pipeline events\ntcp://127.0.0.1:10500\n(--event-uri)"| LB
-    LB -->|"State strings\nws://localhost:8765"| CR
+    HA <-->|"Wyoming protocol tcp://0.0.0.0:10700"| WY
+    OW <-->|"Wake word events tcp://127.0.0.1:10400"| WY
+    WY -->|"Pipeline events tcp://127.0.0.1:10500 --event-uri"| LB
+    LB -->|"State strings ws://localhost:8765"| CR
 ```
 
 ### State Machine
