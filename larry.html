@@ -3,343 +3,947 @@
 <head>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: #0a0a0a;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    cursor: none;
-    font-family: monospace;
-  }
-  #stage { position: relative; width: 100%; height: 100%; }
-  #larry {
-    position: absolute;
-    transform: translate(-50%, -50%);
+  body { background: #0a0a0a; width: 100vw; height: 100vh; overflow: hidden; cursor: none; font-family: monospace; }
+  canvas { display: block; }
+  #state-label {
+    position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,0.25); font-size: 12px; letter-spacing: 0.25em;
+    text-transform: uppercase; z-index: 20;
   }
   .scanline {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,255,70,0.015) 2px,
-      rgba(0,255,70,0.015) 4px
-    );
-    pointer-events: none;
-    z-index: 10;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 10;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px,
+      rgba(0,255,70,0.03) 3px, rgba(0,255,70,0.03) 4px);
   }
   #tap-hint {
-    position: fixed;
-    bottom: 32px;
-    width: 100%;
-    text-align: center;
-    color: rgba(0,255,70,0.25);
-    font-size: 13px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    z-index: 20;
-    animation: fadeHint 3s ease-in-out infinite;
+    position: fixed; bottom: 32px; width: 100%; text-align: center;
+    color: rgba(0,255,70,0.3); font-size: 13px; letter-spacing: 0.25em;
+    text-transform: uppercase; z-index: 20; animation: fadeHint 3s ease-in-out infinite;
   }
-  @keyframes fadeHint {
-    0%, 100% { opacity: 0; }
-    50% { opacity: 1; }
-  }
+  @keyframes fadeHint { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
 </style>
 </head>
 <body>
 <div class="scanline"></div>
-<div id="stage">
-  <svg id="larry" viewBox="0 0 260 310" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <filter id="glow">
-        <feGaussianBlur stdDeviation="3" result="blur"/>
-        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
-      <filter id="softglow">
-        <feGaussianBlur stdDeviation="6" result="blur"/>
-        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
-      <filter id="strongglow">
-        <feGaussianBlur stdDeviation="4" result="blur"/>
-        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
-      <clipPath id="clip-left"><circle cx="85" cy="105" r="28"/></clipPath>
-      <clipPath id="clip-right"><circle cx="175" cy="105" r="28"/></clipPath>
-    </defs>
-
-    <!-- neck -->
-    <rect x="105" y="205" width="20" height="18" rx="2" fill="#1a1a1a" stroke="#00ff46" stroke-width="0.8"/>
-    <rect x="110" y="207" width="10" height="3" rx="1" fill="#00ff46" opacity="0.4"/>
-    <rect x="110" y="213" width="10" height="3" rx="1" fill="#00ff46" opacity="0.4"/>
-    <rect x="110" y="219" width="10" height="3" rx="1" fill="#00ff46" opacity="0.4"/>
-
-    <!-- body -->
-    <rect x="60" y="222" width="140" height="70" rx="10" fill="#111" stroke="#00ff46" stroke-width="1.2"/>
-    <rect x="80" y="235" width="100" height="44" rx="6" fill="#0d0d0d" stroke="#00ff46" stroke-width="0.6" opacity="0.8"/>
-    <circle cx="100" cy="250" r="5" fill="#00ff46" filter="url(#glow)" opacity="0.9">
-      <animate attributeName="opacity" values="0.9;0.3;0.9" dur="2.1s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="118" cy="250" r="5" fill="#00ff46" filter="url(#glow)" opacity="0.5">
-      <animate attributeName="opacity" values="0.5;0.9;0.5" dur="1.8s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="136" cy="250" r="5" fill="#00ff46" filter="url(#glow)" opacity="0.7">
-      <animate attributeName="opacity" values="0.7;0.2;0.7" dur="2.4s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="154" cy="250" r="5" fill="#00ff46" filter="url(#glow)" opacity="0.4">
-      <animate attributeName="opacity" values="0.4;0.9;0.4" dur="1.6s" repeatCount="indefinite"/>
-    </circle>
-    <rect x="88" y="262" width="84" height="8" rx="4" fill="#0a0a0a" stroke="#00ff46" stroke-width="0.5"/>
-    <rect x="90" y="264" width="40" height="4" rx="2" fill="#00ff46" opacity="0.7">
-      <animate attributeName="width" values="40;70;20;55;40" dur="4s" repeatCount="indefinite"/>
-    </rect>
-
-    <!-- head -->
-    <rect x="45" y="30" width="170" height="175" rx="18" fill="#111" stroke="#00ff46" stroke-width="1.5"/>
-    <rect x="90" y="30" width="80" height="6" rx="3" fill="#00ff46" opacity="0.15"/>
-    <rect x="126" y="8" width="8" height="24" rx="3" fill="#1a1a1a" stroke="#00ff46" stroke-width="0.8"/>
-    <circle cx="130" cy="6" r="5" fill="#00ff46" filter="url(#glow)">
-      <animate attributeName="opacity" values="1;0.2;1" dur="1.2s" repeatCount="indefinite"/>
-    </circle>
-    <rect x="60" y="48" width="140" height="140" rx="12" fill="#0c0c0c" stroke="#00ff46" stroke-width="0.6" opacity="0.6"/>
-
-    <!-- side vents -->
-    <rect x="45" y="90" width="10" height="4" rx="1" fill="#00ff46" opacity="0.3"/>
-    <rect x="45" y="100" width="10" height="4" rx="1" fill="#00ff46" opacity="0.3"/>
-    <rect x="45" y="110" width="10" height="4" rx="1" fill="#00ff46" opacity="0.3"/>
-    <rect x="205" y="90" width="10" height="4" rx="1" fill="#00ff46" opacity="0.3"/>
-    <rect x="205" y="100" width="10" height="4" rx="1" fill="#00ff46" opacity="0.3"/>
-    <rect x="205" y="110" width="10" height="4" rx="1" fill="#00ff46" opacity="0.3"/>
-
-    <!-- LEFT EYE -->
-    <g>
-      <circle cx="85" cy="105" r="30" fill="#0a0a0a" stroke="#00ff46" stroke-width="1.5" filter="url(#glow)"/>
-      <circle cx="85" cy="105" r="27" fill="none" stroke="#00ff46" stroke-width="0.5" stroke-dasharray="4 6" opacity="0.5"/>
-      <rect x="81" y="74" width="8" height="3" rx="1" fill="#00ff46" opacity="0.7"/>
-      <rect x="81" y="133" width="8" height="3" rx="1" fill="#00ff46" opacity="0.7"/>
-      <rect x="54" y="102" width="3" height="6" rx="1" fill="#00ff46" opacity="0.7"/>
-      <rect x="113" y="102" width="3" height="6" rx="1" fill="#00ff46" opacity="0.7"/>
-      <circle cx="85" cy="105" r="22" fill="#050f05" stroke="#00ff46" stroke-width="0.8"/>
-      <g clip-path="url(#clip-left)">
-        <g id="iris-l-rot" style="transform-origin:85px 105px">
-          <circle cx="85" cy="105" r="20" fill="none" stroke="#00ff46" stroke-width="0.8" stroke-dasharray="8 4" opacity="0.6"/>
-          <circle cx="85" cy="105" r="15" fill="none" stroke="#00ff46" stroke-width="0.6" stroke-dasharray="5 5" opacity="0.5"/>
-          <circle cx="85" cy="105" r="10" fill="none" stroke="#00ff46" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.7"/>
-          <line x1="85" y1="77" x2="85" y2="133" stroke="#00ff46" stroke-width="0.4" opacity="0.3"/>
-          <line x1="57" y1="105" x2="113" y2="105" stroke="#00ff46" stroke-width="0.4" opacity="0.3"/>
-          <line x1="65" y1="85" x2="105" y2="125" stroke="#00ff46" stroke-width="0.4" opacity="0.3"/>
-          <line x1="105" y1="85" x2="65" y2="125" stroke="#00ff46" stroke-width="0.4" opacity="0.3"/>
-          <line x1="65" y1="95" x2="105" y2="115" stroke="#00ff46" stroke-width="0.3" opacity="0.2"/>
-          <line x1="105" y1="95" x2="65" y2="115" stroke="#00ff46" stroke-width="0.3" opacity="0.2"/>
-          <circle cx="85" cy="105" r="5" fill="none" stroke="#00ff46" stroke-width="1" opacity="0.5"/>
-        </g>
-      </g>
-      <ellipse id="pupil-l" cx="85" cy="105" rx="3.5" ry="9" fill="#00ff46" filter="url(#strongglow)" opacity="0.95"/>
-      <ellipse cx="85" cy="105" rx="1.5" ry="6" fill="#001a00"/>
-      <ellipse cx="83" cy="101" rx="1" ry="2" fill="#00ff46" opacity="0.8"/>
-      <line id="scan-l" x1="57" y1="105" x2="113" y2="105" stroke="#00ff46" stroke-width="1" opacity="0" filter="url(#glow)" clip-path="url(#clip-left)"/>
-      <circle cx="85" cy="105" r="22" fill="none" stroke="#00ff46" stroke-width="2" opacity="0.1" filter="url(#strongglow)"/>
-    </g>
-
-    <!-- RIGHT EYE -->
-    <g>
-      <circle cx="175" cy="105" r="30" fill="#0a0a0a" stroke="#00ff46" stroke-width="1.5" filter="url(#glow)"/>
-      <circle cx="175" cy="105" r="27" fill="none" stroke="#00ff46" stroke-width="0.5" stroke-dasharray="4 6" opacity="0.5"/>
-      <rect x="171" y="74" width="8" height="3" rx="1" fill="#00ff46" opacity="0.7"/>
-      <rect x="171" y="133" width="8" height="3" rx="1" fill="#00ff46" opacity="0.7"/>
-      <rect x="144" y="102" width="3" height="6" rx="1" fill="#00ff46" opacity="0.7"/>
-      <rect x="203" y="102" width="3" height="6" rx="1" fill="#00ff46" opacity="0.7"/>
-      <circle cx="175" cy="105" r="22" fill="#050f05" stroke="#00ff46" stroke-width="0.8"/>
-      <g clip-path="url(#clip-right)">
-        <g id="iris-r-rot" style="transform-origin:175px 105px">
-          <circle cx="175" cy="105" r="20" fill="none" stroke="#00ff46" stroke-width="0.8" stroke-dasharray="8 4" opacity="0.6"/>
-          <circle cx="175" cy="105" r="15" fill="none" stroke="#00ff46" stroke-width="0.6" stroke-dasharray="5 5" opacity="0.5"/>
-          <circle cx="175" cy="105" r="10" fill="none" stroke="#00ff46" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.7"/>
-          <line x1="175" y1="77" x2="175" y2="133" stroke="#00ff46" stroke-width="0.4" opacity="0.3"/>
-          <line x1="147" y1="105" x2="203" y2="105" stroke="#00ff46" stroke-width="0.4" opacity="0.3"/>
-          <line x1="155" y1="85" x2="195" y2="125" stroke="#00ff46" stroke-width="0.4" opacity="0.3"/>
-          <line x1="195" y1="85" x2="155" y2="125" stroke="#00ff46" stroke-width="0.4" opacity="0.3"/>
-          <line x1="155" y1="95" x2="195" y2="115" stroke="#00ff46" stroke-width="0.3" opacity="0.2"/>
-          <line x1="195" y1="95" x2="155" y2="115" stroke="#00ff46" stroke-width="0.3" opacity="0.2"/>
-          <circle cx="175" cy="105" r="5" fill="none" stroke="#00ff46" stroke-width="1" opacity="0.5"/>
-        </g>
-      </g>
-      <ellipse id="pupil-r" cx="175" cy="105" rx="3.5" ry="9" fill="#00ff46" filter="url(#strongglow)" opacity="0.95"/>
-      <ellipse cx="175" cy="105" rx="1.5" ry="6" fill="#001a00"/>
-      <ellipse cx="173" cy="101" rx="1" ry="2" fill="#00ff46" opacity="0.8"/>
-      <line id="scan-r" x1="147" y1="105" x2="203" y2="105" stroke="#00ff46" stroke-width="1" opacity="0" filter="url(#glow)" clip-path="url(#clip-right)"/>
-      <circle cx="175" cy="105" r="22" fill="none" stroke="#00ff46" stroke-width="2" opacity="0.1" filter="url(#strongglow)"/>
-    </g>
-
-    <!-- nose -->
-    <circle cx="130" cy="152" r="3" fill="#00ff46" opacity="0.4" filter="url(#glow)"/>
-
-    <!-- mouth -->
-    <rect x="92" y="163" width="76" height="18" rx="6" fill="#0a0a0a" stroke="#00ff46" stroke-width="0.6"/>
-    <line x1="100" y1="172" x2="160" y2="172" stroke="#00ff46" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
-    <circle cx="163" cy="170" r="2.5" fill="none" stroke="#00ff46" stroke-width="1" opacity="0.6">
-      <animate attributeName="r" values="2.5;5;2.5" dur="2s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.6;0;0.6" dur="2s" repeatCount="indefinite"/>
-      <animate attributeName="cy" values="170;163;170" dur="2s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="169" cy="164" r="4" fill="none" stroke="#00ff46" stroke-width="1" opacity="0.4">
-      <animate attributeName="r" values="4;8;4" dur="2s" begin="0.4s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.4;0;0.4" dur="2s" begin="0.4s" repeatCount="indefinite"/>
-      <animate attributeName="cy" values="164;154;164" dur="2s" begin="0.4s" repeatCount="indefinite"/>
-    </circle>
-
-    <!-- ZZZ -->
-    <text x="188" y="72" font-family="monospace" font-size="14" fill="#00ff46" filter="url(#glow)" font-weight="bold">Z
-      <animate attributeName="opacity" values="0.9;0;0.9" dur="3s" repeatCount="indefinite"/>
-      <animate attributeName="y" values="72;58;72" dur="3s" repeatCount="indefinite"/>
-    </text>
-    <text x="200" y="56" font-family="monospace" font-size="18" fill="#00ff46" filter="url(#glow)" font-weight="bold">Z
-      <animate attributeName="opacity" values="0;0.7;0" dur="3s" begin="0.8s" repeatCount="indefinite"/>
-      <animate attributeName="y" values="56;40;56" dur="3s" begin="0.8s" repeatCount="indefinite"/>
-    </text>
-    <text x="215" y="40" font-family="monospace" font-size="22" fill="#00ff46" filter="url(#softglow)" font-weight="bold">Z
-      <animate attributeName="opacity" values="0;0.5;0" dur="3s" begin="1.6s" repeatCount="indefinite"/>
-      <animate attributeName="y" values="40;22;40" dur="3s" begin="1.6s" repeatCount="indefinite"/>
-    </text>
-
-    <!-- breathing -->
-    <animateTransform attributeName="transform" type="scale" values="1 1; 1.012 1.008; 1 1" dur="4s" repeatCount="indefinite" additive="sum" transformOrigin="130 155"/>
-  </svg>
-</div>
+<canvas id="c"></canvas>
+<div id="state-label"></div>
 <div id="tap-hint">tap to wake larry</div>
 
 <script>
-  // =============================================
-  // LARRY CONFIG — tweak these to your liking
-  // =============================================
-  const CONFIG = {
-    // Size of Larry in pixels
-    larryWidth:  420,
-    larryHeight: 480,
+'use strict';
 
-    // Movement speed (pixels per frame at 60fps)
-    speedMin: 0.9,
-    speedMax: 1.4,
+// ================================================================
+// CONFIG — everything you'd want to tweak is up here
+// ================================================================
 
-    // How often the scan triggers (milliseconds, random between min and max)
-    scanIntervalMin: 5000,
-    scanIntervalMax: 13000,
+// Larry's size as a fraction of the shorter screen edge (0–1)
+const SIZE_FRACTION    = 0.285;
 
-    // How fast the iris spins during a scan (degrees per frame)
-    scanSpinSpeed: 1.8,
+// Drift speed while sleeping (px / frame at 60 fps)
+const DRIFT_SPEED_MIN  = 0.9;
+const DRIFT_SPEED_MAX  = 1.4;
 
-    // How fast the iris slowly rotates when idle
-    idleSpinSpeed: 0.04,
+// Time between retinal scans while sleeping (ms)
+const SCAN_INTERVAL_MIN = 5000;
+const SCAN_INTERVAL_MAX = 13000;
 
-    // Duration of the scan sweep animation (milliseconds)
-    scanDuration: 2200,
+// Iris rotation speed (degrees / frame at 60 fps)
+const SCAN_SPIN_SPEED  = 1.8;   // during a scan
+const IDLE_SPIN_SPEED  = 0.045; // between scans
 
-    // Screensaver idle timeout before showing Larry (seconds, for swayidle)
-    // Note: change this in your systemd/autostart config, not here
-    // Just a reminder: current value is 300s (5 minutes)
+// How long one retinal scan sweep takes (ms)
+const SCAN_DURATION    = 2400;
 
-    // Where to go when Larry is tapped
-    wakeUrl: 'http://192.168.1.182:8123',
+// How far the whole robot bounces vertically in awake states (px)
+const BOUNCE_AMOUNT    = 18;
 
-    // Accent color (Razer green)
-    accentColor: '#00ff46',
+// Where to navigate when tapped — leave empty to window.close()
+const WAKE_URL         = '';
 
-    // Background color
-    bgColor: '#0a0a0a',
-  };
-  // =============================================
+// WebSocket bridge URL — larry-bridge.py runs on the Pi and sends state changes here
+const WS_URL           = 'ws://localhost:8765';
 
-  const larry = document.getElementById('larry');
-  larry.style.width  = CONFIG.larryWidth  + 'px';
-  larry.style.height = CONFIG.larryHeight + 'px';
-  document.body.style.background = CONFIG.bgColor;
+// Arm spring physics — controls how fluidly elbows and wrists follow targets
+const ARM_STIFFNESS    = 0.12;
+const ARM_DAMPING      = 0.72;
+const WRIST_STIFFNESS  = 0.15;
 
-  const irisL  = document.getElementById('iris-l-rot');
-  const irisR  = document.getElementById('iris-r-rot');
-  const pupilL = document.getElementById('pupil-l');
-  const pupilR = document.getElementById('pupil-r');
-  const scanL  = document.getElementById('scan-l');
-  const scanR  = document.getElementById('scan-r');
+// Colours
+// accentColor (green) drives body, arms, LEDs, mouth, head shell — always green
+// eyeColor drives eyes, iris, antenna tip, and listening waves — changes per state
+const COLOR_GREEN      = '#00ff46'; // sleeping + talking accent
+const COLOR_BLUE       = '#00cfff'; // listening eyes / antenna / waves
+const COLOR_RED_PUPIL  = '#ff2200'; // talking pupils
+const BG_COLOR         = '#0a0a0a';
 
-  let x = window.innerWidth  / 2;
-  let y = window.innerHeight / 2;
+// State preview cycle — remove tickStateCycle() call when wiring openwakeword
+const CYCLE_STATES     = ['sleeping', 'listening', 'talking'];
+const CYCLE_DURATION   = 10000; // ms per state
 
-  function randSpeed() {
-    const mag = CONFIG.speedMin + Math.random() * (CONFIG.speedMax - CONFIG.speedMin);
-    return Math.random() > 0.5 ? mag : -mag;
-  }
-  let vx = randSpeed();
-  let vy = randSpeed();
+// ================================================================
+// DERIVED DIMENSIONS  (all scale from SIZE_FRACTION)
+// Change SIZE_FRACTION above; don't change these directly.
+// ================================================================
 
-  let angleL = 0, angleR = 0;
-  let scanning = false;
-  let scanT = 0;
-  let nextScan = CONFIG.scanIntervalMin + Math.random() * (CONFIG.scanIntervalMax - CONFIG.scanIntervalMin);
-  let lastTime = null;
+const LARRY_W  = Math.min(window.innerWidth, window.innerHeight) * SIZE_FRACTION;
+const S        = LARRY_W / 260; // universal pixel scale factor
 
-  function loop(ts) {
-    if (!lastTime) lastTime = ts;
-    const dt = Math.min(ts - lastTime, 50);
-    lastTime = ts;
+const BODY_W   = 160 * S,  BODY_H  = 72 * S,  BODY_Y  = 50 * S;
+const NECK_W   = 24  * S,  NECK_H  = 18 * S,  NECK_Y  = BODY_Y - NECK_H;
+const HEAD_W   = 170 * S,  HEAD_H  = 165 * S, HEAD_Y  = NECK_Y - HEAD_H;
+const ANT_H    = 28  * S;
+const EYE_R    = 34  * S,  EYE_OFF = 50 * S,  EYE_Y   = HEAD_Y + HEAD_H * 0.42;
+const MOUTH_W  = 90  * S,  MOUTH_H = 22 * S,  MOUTH_Y = HEAD_Y + HEAD_H * 0.82;
+const ARM_R    = 11  * S;  // arm tube half-thickness
+const HAND_R   = 13  * S;  // hand arc radius
 
-    // Move Larry
-    x += vx;
-    y += vy;
-    const hw = CONFIG.larryWidth  / 2;
-    const hh = CONFIG.larryHeight / 2;
-    if (x - hw < 0)                  { x = hw;                   vx =  Math.abs(vx); }
-    if (x + hw > window.innerWidth)  { x = window.innerWidth-hw; vx = -Math.abs(vx); }
-    if (y - hh < 0)                  { y = hh;                   vy =  Math.abs(vy); }
-    if (y + hh > window.innerHeight) { y = window.innerHeight-hh; vy = -Math.abs(vy); }
-    larry.style.left = x + 'px';
-    larry.style.top  = y + 'px';
+// ================================================================
+// CANVAS
+// ================================================================
 
-    // Eye animation
-    if (scanning) {
-      scanT += dt;
-      const p    = Math.min(scanT / CONFIG.scanDuration, 1);
-      const midP = Math.sin(p * Math.PI);
+const canvas     = document.getElementById('c');
+const ctx        = canvas.getContext('2d');
+const stateLabel = document.getElementById('state-label');
 
-      angleL += CONFIG.scanSpinSpeed * dt / 16;
-      angleR += CONFIG.scanSpinSpeed * dt / 16;
+function resizeCanvas() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
 
-      const scanY = 77 + p * 56;
-      scanL.setAttribute('y1', scanY); scanL.setAttribute('y2', scanY);
-      scanR.setAttribute('y1', scanY); scanR.setAttribute('y2', scanY);
-      scanL.setAttribute('opacity', (midP * 0.9).toFixed(2));
-      scanR.setAttribute('opacity', (midP * 0.9).toFixed(2));
+// ================================================================
+// RUNTIME STATE
+// ================================================================
 
-      const pw = 3.5 + midP * 3;
-      const ph = 9   - midP * 4;
-      pupilL.setAttribute('rx', pw.toFixed(1)); pupilL.setAttribute('ry', ph.toFixed(1));
-      pupilR.setAttribute('rx', pw.toFixed(1)); pupilR.setAttribute('ry', ph.toFixed(1));
+let currentState = 'sleeping';
+let accentColor  = COLOR_GREEN; // body / arms / LEDs — always green
+let eyeColor     = COLOR_GREEN; // eyes / antenna / waves — changes per state
+let wsConnected  = false;       // true when larry-bridge WebSocket is live
 
-      if (p >= 1) {
-        scanning = false; scanT = 0;
-        scanL.setAttribute('opacity', '0'); scanR.setAttribute('opacity', '0');
-        pupilL.setAttribute('rx', '3.5');   pupilL.setAttribute('ry', '9');
-        pupilR.setAttribute('rx', '3.5');   pupilR.setAttribute('ry', '9');
-        nextScan = CONFIG.scanIntervalMin + Math.random() * (CONFIG.scanIntervalMax - CONFIG.scanIntervalMin);
-      }
-    } else {
-      angleL += CONFIG.idleSpinSpeed * dt / 16;
-      angleR += CONFIG.idleSpinSpeed * dt / 16;
-      nextScan -= dt;
-      if (nextScan <= 0) scanning = true;
-    }
+// Position & drift (sleeping)
+let posX = 0, posY = 0, velX = 0, velY = 0;
 
-    irisL.style.transform = `rotate(${angleL.toFixed(2)}deg)`;
-    irisR.style.transform = `rotate(${angleR.toFixed(2)}deg)`;
+// Bounce & squish (awake states — applies to whole robot)
+let bounceY = 0, bounceYTarget = 0, bouncePhase = 0;
+let squishX = 1, squishY = 1;
 
-    requestAnimationFrame(loop);
-  }
+// Iris
+let irisAngleL = 0, irisAngleR = 0;
 
-  requestAnimationFrame(loop);
+// Retinal scan
+let scanning = false, scanTimer = 0, nextScan = 0;
 
-  function wake() { window.location.href = CONFIG.wakeUrl; }
+// Mouth
+let mouthOpen = 0, mouthOpenTarget = 0;
+
+// Arms — spring physics elbow + wrist per side
+let armLift = 0, armLiftTarget = 0;
+const elbowL = { x: 0, y: 0, vx: 0, vy: 0 };
+const elbowR = { x: 0, y: 0, vx: 0, vy: 0 };
+let wristLx = 0, wristLy = 0, wristRx = 0, wristRy = 0;
+
+// Pupils
+let pupilRX = 5 * S, pupilRXTarget = 5 * S;
+let pupilRY = 12 * S, pupilRYTarget = 12 * S;
+let pupilColor = COLOR_GREEN;
+
+// Chest LEDs — each blinks on its own independent sine wave
+const ledTimers = [0,1,2,3].map(() => ({
+  period: 1500 + Math.random() * 1500,
+  phase:  Math.random() * Math.PI * 2,
+}));
+
+// VU activity bar value
+let vuVal = 0.5;
+
+// State cycle
+let cycleTimer = 0, cycleIndex = 0;
+
+let lastFrameTime = null;
+
+// ================================================================
+// ENTRY POINT
+// ================================================================
+
+function setup() {
+  posX = window.innerWidth  / 2;
+  posY = window.innerHeight / 2;
+  velX = randomDriftSpeed();
+  velY = randomDriftSpeed();
+  nextScan = randomScanInterval();
+
+  enterState('sleeping');
+  connectWebSocket();
+  requestAnimationFrame(mainLoop);
+
   document.addEventListener('click',      wake);
-  document.addEventListener('touchstart', wake);
+  document.addEventListener('touchstart', wake, { passive: true });
   document.addEventListener('keydown',    wake);
+}
+
+// ================================================================
+// MAIN LOOP
+// ================================================================
+
+function mainLoop(ts) {
+  if (!lastFrameTime) lastFrameTime = ts;
+  const dt = Math.min(ts - lastFrameTime, 50);
+  lastFrameTime = ts;
+
+  tickStateCycle(dt);
+  update(dt, ts);
+  draw(ts);
+
+  requestAnimationFrame(mainLoop);
+}
+
+// ================================================================
+// STATE MANAGEMENT
+// Call enterState('listening') / ('talking') / ('sleeping')
+// from your openwakeword integration.
+// ================================================================
+
+function enterState(newState) {
+  currentState = newState;
+  stateLabel.textContent = newState;
+
+  // Reset scan
+  scanning = false; scanTimer = 0;
+  nextScan = newState === 'sleeping' ? randomScanInterval() : Infinity;
+
+  // Body / arms / LEDs always stay green
+  accentColor = COLOR_GREEN;
+
+  if (newState === 'sleeping') {
+    eyeColor        = COLOR_GREEN;
+    pupilColor      = COLOR_GREEN;
+    pupilRXTarget   = 5  * S;
+    pupilRYTarget   = 12 * S;
+    armLiftTarget   = 0;
+    mouthOpenTarget = 0;
+  }
+
+  if (newState === 'listening') {
+    eyeColor        = COLOR_BLUE;  // eyes, antenna tip, and waves go blue
+    pupilColor      = COLOR_BLUE;
+    pupilRXTarget   = 5  * S;
+    pupilRYTarget   = 12 * S;
+    armLiftTarget   = 1;
+    mouthOpenTarget = 0;
+  }
+
+  if (newState === 'talking') {
+    eyeColor        = COLOR_GREEN;
+    pupilColor      = COLOR_RED_PUPIL; // dilated red pupils
+    pupilRXTarget   = 15 * S;
+    pupilRYTarget   = 15 * S;
+    armLiftTarget   = 1;
+  }
+}
+
+// ================================================================
+// UPDATE  — all physics / animation values, no drawing
+// ================================================================
+
+function update(dt, ts) {
+  const dtF = dt / 16.67; // normalised to 60 fps
+
+  if (currentState === 'sleeping') {
+    updateSleeping(dt, dtF);
+  } else {
+    updateAwake(dt, dtF, ts);
+  }
+
+  updateArmPhysics(dtF, ts);
+  updateGlobalLerps(ts);
+}
+
+function updateSleeping(dt, dtF) {
+  // Drift and bounce off screen edges
+  posX += velX; posY += velY;
+  const hw = LARRY_W * 0.65, hh = LARRY_W * 0.80;
+  if (posX - hw < 0)             { posX = hw;               velX =  Math.abs(velX); }
+  if (posX + hw > canvas.width)  { posX = canvas.width-hw;  velX = -Math.abs(velX); }
+  if (posY - hh < 0)             { posY = hh;               velY =  Math.abs(velY); }
+  if (posY + hh > canvas.height) { posY = canvas.height-hh; velY = -Math.abs(velY); }
+
+  // Ease back to neutral (no bounce, no squish, arms hanging)
+  bounceY  = lerp(bounceY,  0, 0.10);
+  squishX  = lerp(squishX,  1, 0.10);
+  squishY  = lerp(squishY,  1, 0.10);
+  armLift  = lerp(armLift,  0, 0.06);
+
+  // Iris slow idle spin
+  irisAngleL += IDLE_SPIN_SPEED * dtF;
+  irisAngleR += IDLE_SPIN_SPEED * dtF;
+  nextScan   -= dt / 1; // dt is already in ms
+  if (nextScan <= 0) scanning = true;
+
+  if (scanning) {
+    irisAngleL += (SCAN_SPIN_SPEED - IDLE_SPIN_SPEED) * dtF;
+    irisAngleR += (SCAN_SPIN_SPEED - IDLE_SPIN_SPEED) * dtF;
+    scanTimer  += dt;
+    const p   = Math.min(scanTimer / SCAN_DURATION, 1);
+    const mid = Math.sin(p * Math.PI);
+    pupilRXTarget = lerp(5*S, 9*S,  mid);
+    pupilRYTarget = lerp(12*S, 5*S, mid);
+    if (p >= 1) {
+      scanning = false; scanTimer = 0;
+      pupilRXTarget = 5 * S; pupilRYTarget = 12 * S;
+      nextScan = randomScanInterval();
+    }
+  }
+}
+
+function updateAwake(dt, dtF, ts) {
+  // Drift back to screen centre
+  posX = lerp(posX, canvas.width  / 2, 0.08);
+  posY = lerp(posY, canvas.height / 2, 0.08);
+
+  // Whole-robot bounce
+  bouncePhase  += dtF * 0.08;
+  const raw     = Math.abs(Math.sin(bouncePhase));
+  bounceYTarget = -raw * BOUNCE_AMOUNT;
+  bounceY       = lerp(bounceY, bounceYTarget, 0.18);
+
+  // Squish: squash wide at downbeat, stretch tall at upbeat
+  squishX = lerp(squishX, 1 + (1 - raw) * 0.10, 0.18);
+  squishY = lerp(squishY, 1 - (1 - raw) * 0.10, 0.18);
+
+  armLift = lerp(armLift, armLiftTarget, 0.06);
+
+  // Iris spins faster when awake
+  irisAngleL += 0.12 * dtF;
+  irisAngleR += 0.12 * dtF;
+
+  if (currentState === 'talking') {
+    mouthOpenTarget = Math.abs(Math.sin(ts * 0.018));
+    const pulse     = 1 + 0.2 * Math.sin(ts * 0.003);
+    pupilRXTarget   = 15 * S * pulse;
+    pupilRYTarget   = 15 * S * pulse;
+  } else {
+    mouthOpenTarget = 0;
+  }
+}
+
+// Elbow spring physics — gives arms fluid secondary motion.
+// Each elbow springs toward a rest target; the wrist follows with a softer spring.
+function updateArmPhysics(dtF, ts) {
+  const sway = Math.sin(ts / 1800) * 4 * S;
+  const t    = armLift;
+
+  // Elbow targets: out to the side (sleep) → raised to shoulder height (awake)
+  const LExT = lerp(-BODY_W * 0.90 + sway, -BODY_W * 1.0  + sway, t);
+  const LEyT = lerp( BODY_Y - BODY_H * 0.1, HEAD_Y + HEAD_H * 0.5, t);
+  const RExT = lerp( BODY_W * 0.90 - sway,   BODY_W * 1.0  - sway, t);
+  const REyT = LEyT;
+
+  // Wrist targets: foot of the L (sleep) → raised and outward (awake)
+  const LWxT = lerp(-BODY_W * 0.90 + sway, -BODY_W * 0.95 + sway, t);
+  const LWyT = lerp( BODY_Y + BODY_H * 1.5,  HEAD_Y, t);
+  const RWxT = lerp( BODY_W * 0.90 - sway,   BODY_W * 0.95 - sway, t);
+  const RWyT = LWyT;
+
+  springElbow(elbowL, LExT, LEyT, dtF);
+  springElbow(elbowR, RExT, REyT, dtF);
+
+  wristLx = lerp(wristLx, LWxT, WRIST_STIFFNESS * dtF);
+  wristLy = lerp(wristLy, LWyT, WRIST_STIFFNESS * dtF);
+  wristRx = lerp(wristRx, RWxT, WRIST_STIFFNESS * dtF);
+  wristRy = lerp(wristRy, RWyT, WRIST_STIFFNESS * dtF);
+}
+
+function springElbow(elbow, tx, ty, dtF) {
+  elbow.vx += (tx - elbow.x) * ARM_STIFFNESS;
+  elbow.vy += (ty - elbow.y) * ARM_STIFFNESS;
+  elbow.vx *= ARM_DAMPING;
+  elbow.vy *= ARM_DAMPING;
+  elbow.x  += elbow.vx * dtF;
+  elbow.y  += elbow.vy * dtF;
+}
+
+// Lerps that run every frame regardless of state
+function updateGlobalLerps(ts) {
+  mouthOpen = lerp(mouthOpen, mouthOpenTarget, 0.20);
+  pupilRX   = lerp(pupilRX,   pupilRXTarget,   0.10);
+  pupilRY   = lerp(pupilRY,   pupilRYTarget,   0.10);
+  vuVal     = clamp(0.5 + 0.3*Math.sin(ts/900) + 0.15*Math.sin(ts/430+1) + 0.05*Math.sin(ts/200+2), 0.05, 1);
+}
+
+// ================================================================
+// DRAW — pure canvas rendering
+// ================================================================
+
+function draw(ts) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = BG_COLOR;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.save();
+  ctx.translate(posX, posY);
+  ctx.scale(squishX, squishY); // squish applied to whole robot
+
+  drawArms(ts);   // drawn first — behind body and head
+  drawBody(ts);   // body box + neck + LEDs + VU bar
+  drawHead(ts);   // head shell + eyes + mouth + antenna
+
+  ctx.restore();
+}
+
+// ================================================================
+// ARMS & HANDS
+// Each arm = quadratic bezier from shoulder → elbow → wrist.
+// Drawn as: thick black stroke (tube body) + faint green rim
+// + thin offset green shine line (makes it look cylindrical).
+// ================================================================
+
+function drawArms(ts) {
+  const sy  = BODY_Y + BODY_H * 0.22 + bounceY;
+  const Lsx = -BODY_W / 2, Rsx = BODY_W / 2;
+
+  // Offset elbow/wrist by bounceY so arms follow the bounce
+  const Lcx = elbowL.x, Lcy = elbowL.y + bounceY;
+  const Lwx = wristLx,  Lwy = wristLy  + bounceY;
+  const Rcx = elbowR.x, Rcy = elbowR.y + bounceY;
+  const Rwx = wristRx,  Rwy = wristRy  + bounceY;
+
+  drawMacaroniArm(Lsx, sy, Lcx, Lcy, Lwx, Lwy, 'left');
+  drawMacaroniArm(Rsx, sy, Rcx, Rcy, Rwx, Rwy, 'right');
+  drawHand(Lwx, Lwy, armLift);
+  drawHand(Rwx, Rwy, armLift);
+}
+
+function drawMacaroniArm(x1, y1, cx, cy, x2, y2, side) {
+  const tube = ARM_R * 2;
+
+  ctx.save();
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+  // Black tube body
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.quadraticCurveTo(cx, cy, x2, y2);
+  ctx.strokeStyle = '#111';
+  ctx.lineWidth   = tube;
+  ctx.stroke();
+
+  // Faint green rim (makes the black tube feel like it has a coloured edge)
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.quadraticCurveTo(cx, cy, x2, y2);
+  ctx.strokeStyle = accentColor;
+  ctx.lineWidth   = tube;
+  ctx.globalAlpha = 0.14;
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // Thin green shine line offset along the curve normal — fakes cylindrical roundness
+  const dx  = x2 - x1, dy = y2 - y1;
+  const len = Math.sqrt(dx*dx + dy*dy) || 1;
+  const nx  = (-dy / len) * (side === 'left' ? -1 : 1);
+  const ny  = ( dx / len) * (side === 'left' ? -1 : 1);
+  const off = ARM_R * 0.42;
+
+  ctx.beginPath();
+  ctx.moveTo(x1 + nx*off*0.4, y1 + ny*off*0.4);
+  ctx.quadraticCurveTo(cx + nx*off, cy + ny*off, x2 + nx*off*0.4, y2 + ny*off*0.4);
+  ctx.strokeStyle = accentColor;
+  ctx.lineWidth   = 3 * S;
+  ctx.globalAlpha = 0.55;
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  ctx.restore();
+}
+
+// U-shaped hand arc.
+// t=0 (sleep): upside-down U — bump faces down, gap opens up toward arm tip.
+// t=1 (awake): right-way-up U — bump faces up, gap opens down toward arm tip.
+function drawHand(wx, wy, t) {
+  const hr = HAND_R;
+  const lw = ARM_R * 2.2;
+
+  // Sleep  (t=0): bottom semicircle: PI → 2*PI, centre ABOVE wrist
+  // Awake  (t=1): top semicircle:    0  → PI,   centre BELOW wrist
+  const startAngle = lerp(Math.PI,   0,          t);
+  const endAngle   = lerp(Math.PI*2, Math.PI,    t);
+  const hcy        = wy + lerp(-hr * 0.9, hr * 0.9, t);
+
+  ctx.save();
+  ctx.lineCap = 'round';
+
+  // Black tube arc
+  ctx.beginPath();
+  ctx.arc(wx, hcy, hr, startAngle, endAngle, false);
+  ctx.strokeStyle = '#111';
+  ctx.lineWidth   = lw;
+  ctx.stroke();
+
+  // Faint green rim
+  ctx.beginPath();
+  ctx.arc(wx, hcy, hr, startAngle, endAngle, false);
+  ctx.strokeStyle = accentColor;
+  ctx.lineWidth   = lw;
+  ctx.globalAlpha = 0.15;
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // Thin green shine on the outer face
+  ctx.beginPath();
+  ctx.arc(wx, hcy, hr + lw * 0.32, startAngle + 0.2, endAngle - 0.2, false);
+  ctx.strokeStyle = accentColor;
+  ctx.lineWidth   = 2.5 * S;
+  ctx.globalAlpha = 0.60;
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  ctx.restore();
+}
+
+// ================================================================
+// BODY — box, inner panel, LEDs, VU bar, neck
+// ================================================================
+
+function drawBody(ts) {
+  const bx = -BODY_W / 2;
+  const by = BODY_Y + bounceY;
+
+  ctx.save();
+
+  // Outer box
+  roundRect(ctx, bx, by, BODY_W, BODY_H, 14*S);
+  ctx.fillStyle = '#111'; ctx.fill();
+  ctx.strokeStyle = accentColor; ctx.lineWidth = 2.5*S; ctx.stroke();
+
+  // Inner panel
+  roundRect(ctx, bx + 22*S, by + 14*S, BODY_W - 44*S, BODY_H - 26*S, 8*S);
+  ctx.fillStyle = '#0d0d0d'; ctx.fill();
+  ctx.strokeStyle = accentColor; ctx.lineWidth = 1*S; ctx.stroke();
+
+  // 4 chest LEDs — each blinks independently
+  const ledSpacing = 22 * S;
+  const ledY       = by + BODY_H * 0.38;
+  for (let i = 0; i < 4; i++) {
+    const lx = -ledSpacing * 1.5 + i * ledSpacing;
+    const b  = 0.5 + 0.5 * Math.sin((ts / ledTimers[i].period) * Math.PI * 2 + ledTimers[i].phase);
+    ctx.beginPath();
+    ctx.arc(lx, ledY, 7*S, 0, Math.PI*2);
+    ctx.fillStyle   = accentColor;
+    ctx.globalAlpha = 0.2 + b * 0.75;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    drawGlow(lx, ledY, 7*S, accentColor, 10*S);
+  }
+
+  // VU bar track
+  const vuX = bx + 28*S, vuY = by + BODY_H * 0.68;
+  const vuW = BODY_W - 56*S, vuH = 8*S;
+  roundRect(ctx, vuX, vuY, vuW, vuH, 4*S);
+  ctx.fillStyle = '#0a0a0a'; ctx.fill();
+  ctx.strokeStyle = accentColor; ctx.lineWidth = 1*S; ctx.stroke();
+
+  // VU bar fill
+  roundRect(ctx, vuX + 2*S, vuY + 2*S, (vuW - 4*S) * vuVal, vuH - 4*S, 3*S);
+  ctx.fillStyle = accentColor; ctx.globalAlpha = 0.85; ctx.fill(); ctx.globalAlpha = 1;
+
+  // Neck — attaches body to head
+  const nx = -NECK_W / 2, ny = by - NECK_H;
+  roundRect(ctx, nx, ny, NECK_W, NECK_H, 4*S);
+  ctx.fillStyle = '#1a1a1a'; ctx.fill();
+  ctx.strokeStyle = accentColor; ctx.lineWidth = 1.5*S; ctx.stroke();
+
+  // Neck ridges
+  for (let i = 0; i < 3; i++) {
+    const ry = ny + 5*S + i * 6*S;
+    roundRect(ctx, nx + 6*S, ry, NECK_W - 12*S, 3*S, 1.5*S);
+    ctx.fillStyle = accentColor; ctx.globalAlpha = 0.45; ctx.fill(); ctx.globalAlpha = 1;
+  }
+
+  ctx.restore();
+}
+
+// ================================================================
+// HEAD — shell, eyes, nose, mouth, ZZZ, sound waves, antenna
+// All drawn with bounceY offset so head moves with body.
+// ================================================================
+
+function drawHead(ts) {
+  ctx.save();
+  ctx.translate(0, bounceY);
+
+  drawHeadShell();
+  drawEyes(ts);
+  drawNose();
+  drawMouth();
+  drawSleepBubbles(ts);
+  drawSoundWaves(ts);
+  drawAntenna(ts);
+
+  ctx.restore();
+}
+
+function drawHeadShell() {
+  const hx = -HEAD_W / 2, hy = HEAD_Y;
+
+  // Outer shell
+  roundRect(ctx, hx, hy, HEAD_W, HEAD_H, 20*S);
+  ctx.fillStyle = '#111'; ctx.fill();
+  ctx.strokeStyle = accentColor; ctx.lineWidth = 2.5*S; ctx.stroke();
+
+  // Inner panel
+  roundRect(ctx, hx + 16*S, hy + 16*S, HEAD_W - 32*S, HEAD_H - 28*S, 12*S);
+  ctx.fillStyle = '#0c0c0c'; ctx.fill();
+  ctx.strokeStyle = accentColor; ctx.lineWidth = 1*S; ctx.globalAlpha = 0.7; ctx.stroke(); ctx.globalAlpha = 1;
+
+  // Top highlight strip
+  roundRect(ctx, hx + 38*S, hy, HEAD_W - 76*S, 5*S, 2*S);
+  ctx.fillStyle = accentColor; ctx.globalAlpha = 0.18; ctx.fill(); ctx.globalAlpha = 1;
+
+  // Side vents (3 per side)
+  for (let i = 0; i < 3; i++) {
+    const vy = hy + 60*S + i * 14*S;
+    roundRect(ctx, hx - 1*S, vy, 12*S, 6*S, 2*S);
+    roundRect(ctx, hx + HEAD_W - 11*S, vy, 12*S, 6*S, 2*S);
+    ctx.fillStyle = accentColor; ctx.globalAlpha = 0.4; ctx.fill(); ctx.globalAlpha = 1;
+  }
+}
+
+// ================================================================
+// EYES
+// Outer ring, tick marks, iris (rotating dashed rings + crosshairs),
+// pupil ellipse + dark slit, specular highlight.
+// eyeColor drives everything inside the eye; accentColor drives nothing here.
+// ================================================================
+
+function drawEyes(ts) {
+  drawEye(-EYE_OFF, EYE_Y, irisAngleL, ts);
+  drawEye( EYE_OFF, EYE_Y, irisAngleR, ts);
+  drawScanBeam();
+}
+
+function drawEye(ex, ey, angle, ts) {
+  ctx.save();
+
+  // Outer ring
+  ctx.beginPath();
+  ctx.arc(ex, ey, EYE_R, 0, Math.PI*2);
+  ctx.fillStyle = '#0a0a0a'; ctx.fill();
+  ctx.strokeStyle = eyeColor; ctx.lineWidth = 2.5*S;
+  ctx.shadowColor = eyeColor; ctx.shadowBlur = 8;
+  ctx.stroke(); ctx.shadowBlur = 0;
+
+  // Cardinal tick marks
+  [[0,-1],[0,1],[-1,0],[1,0]].forEach(([tx,ty]) => {
+    ctx.fillStyle = eyeColor; ctx.globalAlpha = 0.8;
+    roundRect(ctx,
+      ex + tx*(EYE_R+1*S) - (ty===0 ? 1.5*S : 4*S),
+      ey + ty*(EYE_R+1*S) - (tx===0 ? 1.5*S : 3.5*S),
+      tx===0 ? 8*S : 3*S, ty===0 ? 5*S : 7*S, 1.5*S);
+    ctx.fill(); ctx.globalAlpha = 1;
+  });
+
+  // Iris background
+  ctx.beginPath();
+  ctx.arc(ex, ey, EYE_R * 0.72, 0, Math.PI*2);
+  ctx.fillStyle = currentState === 'sleeping' ? '#040f04' : '#04080a';
+  ctx.fill();
+  ctx.strokeStyle = eyeColor; ctx.lineWidth = 1.5*S; ctx.stroke();
+
+  // Rotating iris rings + crosshairs
+  ctx.save();
+  ctx.translate(ex, ey);
+  ctx.rotate(angle * Math.PI / 180);
+
+  [
+    { r: EYE_R*0.65, dash: [8*S,6*S], w: 1.8*S, op: 0.85 },
+    { r: EYE_R*0.48, dash: [6*S,5*S], w: 1.8*S, op: 0.75 },
+    { r: EYE_R*0.32, dash: [4*S,5*S], w: 1.8*S, op: 0.85 },
+    { r: EYE_R*0.15, dash: [],         w: 1.5*S, op: 0.60 },
+  ].forEach(({ r, dash, w, op }) => {
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI*2);
+    ctx.setLineDash(dash);
+    ctx.strokeStyle = eyeColor; ctx.lineWidth = w; ctx.globalAlpha = op;
+    ctx.stroke(); ctx.globalAlpha = 1;
+  });
+  ctx.setLineDash([]);
+
+  ctx.strokeStyle = eyeColor; ctx.globalAlpha = 0.5; ctx.lineWidth = 1.2*S;
+  ctx.beginPath(); ctx.moveTo(0, -EYE_R*0.7); ctx.lineTo(0, EYE_R*0.7); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-EYE_R*0.7, 0); ctx.lineTo(EYE_R*0.7, 0); ctx.stroke();
+  ctx.globalAlpha = 0.35; ctx.lineWidth = 1*S;
+  ctx.beginPath(); ctx.moveTo(-EYE_R*0.5,-EYE_R*0.5); ctx.lineTo(EYE_R*0.5,EYE_R*0.5); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo( EYE_R*0.5,-EYE_R*0.5); ctx.lineTo(-EYE_R*0.5,EYE_R*0.5); ctx.stroke();
+  ctx.globalAlpha = 1;
+  ctx.restore();
+
+  // Pupil
+  ctx.beginPath();
+  ctx.ellipse(ex, ey, pupilRX, pupilRY, 0, 0, Math.PI*2);
+  ctx.fillStyle = pupilColor; ctx.shadowColor = pupilColor; ctx.shadowBlur = 12;
+  ctx.fill(); ctx.shadowBlur = 0;
+
+  // Dark pupil slit (hidden during talking — whole pupil is solid red)
+  if (currentState !== 'talking') {
+    ctx.beginPath();
+    ctx.ellipse(ex, ey, pupilRX * 0.45, pupilRY * 0.7, 0, 0, Math.PI*2);
+    ctx.fillStyle = currentState === 'listening' ? '#000810' : '#001800';
+    ctx.fill();
+  }
+
+  // Specular highlight
+  ctx.beginPath();
+  ctx.ellipse(ex - 2.5*S, ey - 3.5*S, 1.5*S, 3*S, 0, 0, Math.PI*2);
+  ctx.fillStyle = eyeColor; ctx.globalAlpha = 0.9; ctx.fill(); ctx.globalAlpha = 1;
+
+  ctx.restore();
+}
+
+// Retinal scan beam sweeps top-to-bottom inside the eye circles
+function drawScanBeam() {
+  if (!scanning) return;
+  const p    = Math.min(scanTimer / SCAN_DURATION, 1);
+  const mid  = Math.sin(p * Math.PI);
+  const scanY = EYE_Y - EYE_R * 0.7 + p * EYE_R * 1.4;
+
+  ctx.save();
+  ctx.globalAlpha = mid * 0.9;
+  ctx.strokeStyle = eyeColor; ctx.lineWidth = 2.5*S;
+  ctx.shadowColor = eyeColor; ctx.shadowBlur = 8;
+
+  for (const ex of [-EYE_OFF, EYE_OFF]) {
+    ctx.save();
+    ctx.beginPath(); ctx.arc(ex, EYE_Y, EYE_R * 0.7, 0, Math.PI*2); ctx.clip();
+    ctx.beginPath(); ctx.moveTo(ex - EYE_R, scanY); ctx.lineTo(ex + EYE_R, scanY);
+    ctx.stroke();
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+// ================================================================
+// NOSE
+// ================================================================
+
+function drawNose() {
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(0, HEAD_Y + HEAD_H * 0.72, 4.5*S, 0, Math.PI*2);
+  ctx.fillStyle = accentColor; ctx.globalAlpha = 0.45; ctx.fill(); ctx.globalAlpha = 1;
+  ctx.restore();
+}
+
+// ================================================================
+// MOUTH
+// Height expands when talking. Horizontal line always visible.
+// ================================================================
+
+function drawMouth() {
+  const mx   = -MOUTH_W / 2;
+  const openH = MOUTH_H * 0.5 + mouthOpen * MOUTH_H * 1.4;
+
+  ctx.save();
+
+  roundRect(ctx, mx, MOUTH_Y - openH/2, MOUTH_W, openH, 8*S);
+  ctx.fillStyle = '#0a0a0a'; ctx.fill();
+  ctx.strokeStyle = accentColor; ctx.lineWidth = 1.8*S; ctx.stroke();
+
+  // Horizontal line — dims slightly when mouth is open
+  ctx.beginPath();
+  ctx.moveTo(mx + 10*S, MOUTH_Y); ctx.lineTo(mx + MOUTH_W - 10*S, MOUTH_Y);
+  ctx.strokeStyle = accentColor; ctx.lineWidth = 2.5*S; ctx.lineCap = 'round';
+  ctx.globalAlpha = currentState === 'talking' ? 0.35 : 0.75;
+  ctx.stroke(); ctx.globalAlpha = 1;
+
+  ctx.restore();
+}
+
+// ================================================================
+// SLEEP BUBBLES — ZZZ text + snore circles (sleeping only)
+// ================================================================
+
+function drawSleepBubbles(ts) {
+  if (currentState !== 'sleeping') return;
+
+  // Snore circles drift upward from mouth corner
+  const SNORE_PERIOD  = 2200;
+  const snoreOffsets  = [0, 600, 1200];
+  const snoreBaseR    = [5*S, 8*S, 11*S];
+  const snoreBaseY    = [MOUTH_Y - 5*S, MOUTH_Y - 20*S, MOUTH_Y - 38*S];
+  const cornerX       = MOUTH_W / 2 + 15*S;
+
+  snoreOffsets.forEach((off, i) => {
+    const t  = ((ts + off) % SNORE_PERIOD) / SNORE_PERIOD;
+    const op = t < 0.15 ? t/0.15 : t < 0.6 ? 1-(t-0.15)/0.45 : 0;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cornerX, snoreBaseY[i] - t * 22*S, snoreBaseR[i], 0, Math.PI*2);
+    ctx.strokeStyle = accentColor; ctx.lineWidth = 1.8*S;
+    ctx.globalAlpha = op * 0.8; ctx.stroke(); ctx.globalAlpha = 1;
+    ctx.restore();
+  });
+
+  // ZZZ text floats upward in staggered sequence
+  const ZZZ_PERIOD   = 3200;
+  const zOffsets     = [0, ZZZ_PERIOD*0.33, ZZZ_PERIOD*0.66];
+  const zSizes       = [16*S, 20*S, 25*S];
+  const zBaseY       = [HEAD_Y + 55*S, HEAD_Y + 30*S, HEAD_Y + 5*S];
+  const zMaxOp       = [0.9, 0.75, 0.55];
+
+  zOffsets.forEach((off, i) => {
+    const t  = ((ts + off) % ZZZ_PERIOD) / ZZZ_PERIOD;
+    const op = t < 0.1 ? t/0.1 : t < 0.65 ? 1-(t-0.1)/0.55 : 0;
+    ctx.save();
+    ctx.font = `bold ${zSizes[i]}px monospace`;
+    ctx.fillStyle = accentColor; ctx.globalAlpha = op * zMaxOp[i];
+    ctx.shadowColor = accentColor; ctx.shadowBlur = 6;
+    ctx.fillText('Z', HEAD_W/2 - 10*S, zBaseY[i] - t * 20*S);
+    ctx.restore();
+  });
+}
+
+// ================================================================
+// SOUND WAVES — pulsing rings around head (listening only)
+// Uses eyeColor so they go blue in listening state.
+// ================================================================
+
+function drawSoundWaves(ts) {
+  if (currentState !== 'listening') return;
+
+  const WAVE_PERIOD  = 1800;
+  const waveOffsets  = [0, WAVE_PERIOD*0.33, WAVE_PERIOD*0.66];
+  const waveBaseR    = [EYE_R*2.2, EYE_R*3.0, EYE_R*3.8];
+
+  waveOffsets.forEach((off, i) => {
+    const t  = ((ts + off) % WAVE_PERIOD) / WAVE_PERIOD;
+    const op = (t < 0.1 ? t/0.1 : 1-t) * 0.65;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(0, EYE_Y, waveBaseR[i] + t * 30*S, 0, Math.PI*2);
+    ctx.strokeStyle = eyeColor; ctx.lineWidth = (3 - i*0.5) * S;
+    ctx.globalAlpha = op; ctx.stroke(); ctx.globalAlpha = 1;
+    ctx.restore();
+  });
+}
+
+// ================================================================
+// ANTENNA — shaft + pulsing tip
+// Tip uses eyeColor so it goes blue in listening state.
+// ================================================================
+
+function drawAntenna(ts) {
+  const aty = HEAD_Y;
+
+  ctx.save();
+
+  // Shaft
+  roundRect(ctx, -5*S, aty - ANT_H, 10*S, ANT_H, 3*S);
+  ctx.fillStyle = '#1a1a1a'; ctx.fill();
+  ctx.strokeStyle = accentColor; ctx.lineWidth = 1.5*S; ctx.stroke();
+
+  // Pulsing tip — uses eyeColor
+  const b  = 0.5 + 0.5 * Math.sin(ts / 600);
+  ctx.beginPath(); ctx.arc(0, aty - ANT_H - 7*S, 7*S, 0, Math.PI*2);
+  ctx.fillStyle   = eyeColor;
+  ctx.globalAlpha = 0.25 + b * 0.75;
+  ctx.shadowColor = eyeColor; ctx.shadowBlur = 12;
+  ctx.fill(); ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+
+  ctx.restore();
+}
+
+// ================================================================
+// STATE CYCLING  — remove this function and its call in mainLoop
+// when wiring up openwakeword
+// ================================================================
+
+function tickStateCycle(dt) {
+  if (wsConnected) return;  // real events take over when bridge is connected
+  cycleTimer += dt;
+  if (cycleTimer >= CYCLE_DURATION) {
+    cycleTimer = 0;
+    cycleIndex = (cycleIndex + 1) % CYCLE_STATES.length;
+    enterState(CYCLE_STATES[cycleIndex]);
+  }
+}
+
+// ================================================================
+// WEBSOCKET BRIDGE
+// Connects to larry-bridge.py on the Pi. Receives state strings
+// ('sleeping' | 'listening' | 'talking') and calls enterState().
+// Automatically reconnects if the bridge restarts.
+// ================================================================
+
+function connectWebSocket() {
+  let ws;
+  try {
+    ws = new WebSocket(WS_URL);
+  } catch (e) {
+    setTimeout(connectWebSocket, 5000);
+    return;
+  }
+
+  ws.onopen = () => {
+    wsConnected = true;
+    console.log('[larry] bridge connected');
+  };
+
+  ws.onmessage = (event) => {
+    const state = event.data.trim();
+    if (['sleeping', 'listening', 'talking'].includes(state)) {
+      enterState(state);
+    }
+  };
+
+  ws.onclose = () => {
+    wsConnected = false;
+    console.log('[larry] bridge disconnected — retrying in 5s');
+    setTimeout(connectWebSocket, 5000);
+  };
+
+  ws.onerror = () => ws.close();
+}
+
+// ================================================================
+// WAKE / CLOSE
+// ================================================================
+
+function wake() {
+  if (WAKE_URL) { window.location.href = WAKE_URL; }
+  else          { window.close(); }
+}
+
+// ================================================================
+// HELPERS
+// ================================================================
+
+function lerp(a, b, t)             { return a + (b - a) * t; }
+function clamp(v, lo, hi)          { return v < lo ? lo : v > hi ? hi : v; }
+function lerp2(a, b, t)            { return a + (b - a) * t; }  // alias used in hand drawing
+function randomDriftSpeed()        { const m = DRIFT_SPEED_MIN + Math.random() * (DRIFT_SPEED_MAX - DRIFT_SPEED_MIN); return Math.random() > 0.5 ? m : -m; }
+function randomScanInterval()      { return SCAN_INTERVAL_MIN + Math.random() * (SCAN_INTERVAL_MAX - SCAN_INTERVAL_MIN); }
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y,     x + w, y + r);
+  ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x,     y + h, x,     y + h - r);
+  ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function drawGlow(x, y, r, color, blur) {
+  ctx.save();
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
+  ctx.fillStyle = color; ctx.shadowColor = color; ctx.shadowBlur = blur;
+  ctx.globalAlpha = 0.25; ctx.fill();
+  ctx.restore();
+}
+
+// ================================================================
+// GO
+// ================================================================
+
+setup();
 </script>
 </body>
 </html>
