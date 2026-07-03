@@ -36,8 +36,10 @@ graph TD
     LB["larry-bridge.py<br/>TCP server port 10500<br/>WebSocket server port 8765"]
     CR["Chromium Kiosk<br/>larry.html"]
 
-    HA <-->|"Wyoming protocol tcp://0.0.0.0:10700"| WY
-    OW <-->|"Wake word events tcp://127.0.0.1:10400"| WY
+    HA -->|"Wyoming protocol tcp://0.0.0.0:10700"| WY
+    WY -->|"Wyoming protocol tcp://0.0.0.0:10700"| HA
+    OW -->|"Wake word events tcp://127.0.0.1:10400"| WY
+    WY -->|"Wake word events tcp://127.0.0.1:10400"| OW
     WY -->|"Pipeline events tcp://127.0.0.1:10500 --event-uri"| LB
     LB -->|"State strings ws://localhost:8765"| CR
 ```
