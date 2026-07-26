@@ -26,16 +26,34 @@ He was built for a Raspberry Pi 5 running a Home Assistant kiosk on a 10.1" touc
 
 ## System Architecture
 
+### Overview
+
+```mermaid
+graph TD
+    HA["Home Assistant<br/><HA_IP>:8123"]
+    WY["wyoming-satellite<br/>speech pipeline<br/>port 10700"]
+    OW["wyoming-openwakeword<br/>wake word detection<br/>port 10400"]
+    LB["larry-bridge.py<br/>TCP server port 10500<br/>WebSocket server port 8765"]
+    CR["Chromium Kiosk<br/>larry.html"]
+
+    HA -->|"Wyoming protocol tcp://0.0.0.0:10700"| WY
+    WY -->|"Wyoming protocol tcp://0.0.0.0:10700"| HA
+    OW -->|"Wake word events tcp://127.0.0.1:10400"| WY
+    WY -->|"Wake word events tcp://127.0.0.1:10400"| OW
+    WY -->|"Pipeline events tcp://127.0.0.1:10500 --event-uri"| LB
+    LB -->|"State strings ws://localhost:8765"| CR
+```
+
 ### State Machine
 
 ```mermaid
 stateDiagram-v2
     [*] --> sleeping
-    sleeping --> listening: detection event\n(wake word fired)
-    listening --> talking: audio-start event\n(TTS playing)
-    talking --> sleeping: played event\n(TTS finished)
-    listening --> sleeping: error event\nOR timeout (10s)
-    talking --> sleeping: error event
+    sleeping --> listening: wake word detected
+    listening --> talking: TTS audio starts
+    talking --> sleeping: TTS finished
+    listening --> sleeping: error or timeout
+    talking --> sleeping: error
 ```
 
 ---
