@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; }
+  body { background: #000; }
+</style>
+</head>
+<body>
+<script>
+  // ================================================================
+  // CONFIG
+  // ================================================================
+  const HA_URL        = 'http://192.168.1.101:8123';
+  const SCREENSAVER   = 'file:///home/<user>/screensaver/larry.html';
+  const IDLE_TIMEOUT  = 300000; // 5 minutes in milliseconds
+
+  // ================================================================
+  setTimeout(() => {
+    window.location.href = SCREENSAVER;
+  }, IDLE_TIMEOUT);
+  window.location.href = HA_URL;
+</script>
+</body>
+</html>
