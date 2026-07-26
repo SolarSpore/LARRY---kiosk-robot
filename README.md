@@ -1,6 +1,6 @@
 # Larry the Screensaver
 
-Larry is a robot screensaver built in a single HTML file. He drifts around the screen to prevent burn-in, his sensors move slowly, and he occasionally uses his cybernetic eyes to run a retinal scan. He is also a reactive face for a Home Assistant voice assistant — his eyes and expression change in real time based on whether the assistant is sleeping, listening, or talking.
+Larry is a robot screensaver built in a single HTML file. He drifts around the screen to prevent burn-in, his sensors move slowly, and he occasionally uses his cybernetic eyes to run a retinal scan. He is also a reactive face for a Home Assistant voice assistant his eyes and expression change in real time based on whether the assistant is sleeping, listening, or talking.
 
 He was built for a Raspberry Pi 5 running a Home Assistant kiosk on a 10.1" touchscreen, but he'll run in any modern browser on any screen size.
 
